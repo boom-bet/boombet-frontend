@@ -1,5 +1,4 @@
-import { authService } from '@/services/authService';
-import { webSocketService } from '@/services/webSocketService';
+import { userService } from '@/services/userService';
 import { useAuthStore } from '@/stores/authStore';
 import React, { useEffect } from 'react';
 
@@ -8,42 +7,23 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-	const { token, setLoading, login, logout } = useAuthStore();
+	const { token, updateUser, logout } = useAuthStore();
 
 	useEffect(() => {
-		const initAuth = async () => {
+		const loadUser = async () => {
 			if (token) {
-				setLoading(true);
 				try {
-					// Проверяем валидность токена и получаем данные пользователя
-					const isValid = await authService.validateToken();
-					if (isValid) {
-						const user = await authService.getProfile();
-						login(token, user);
-
-						// Подключаемся к WebSocket
-						webSocketService.connect();
-					} else {
-						logout();
-					}
+					const userData = await userService.getCurrentUser();
+					updateUser(userData);
 				} catch (error) {
-					console.error('Auth initialization error:', error);
+					console.error('Failed to load user:', error);
 					logout();
-				} finally {
-					setLoading(false);
 				}
 			}
 		};
 
-		initAuth();
-	}, [token, login, logout, setLoading]);
-
-	// Отключаемся от WebSocket при выходе
-	useEffect(() => {
-		return () => {
-			webSocketService.disconnect();
-		};
-	}, []);
+		loadUser();
+	}, [token]);
 
 	return <>{children}</>;
 };

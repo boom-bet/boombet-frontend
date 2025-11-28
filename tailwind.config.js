@@ -4,59 +4,37 @@ export default {
 	theme: {
 		extend: {
 			colors: {
-				// Основные цвета для ставок
 				primary: {
-					50: '#eff6ff',
-					100: '#dbeafe',
-					200: '#bfdbfe',
-					300: '#93c5fd',
-					400: '#60a5fa',
-					500: '#3b82f6',
-					600: '#2563eb',
-					700: '#1d4ed8',
-					800: '#1e40af',
-					900: '#1e3a8a',
+					50: '#f0f9ff',
+					100: '#e0f2fe',
+					200: '#bae6fd',
+					300: '#7dd3fc',
+					400: '#38bdf8',
+					500: '#0ea5e9',
+					600: '#0284c7',
+					700: '#0369a1',
+					800: '#075985',
+					900: '#0c4a6e',
 				},
-				// Темная тема
 				dark: {
-					50: '#f8fafc',
-					100: '#f1f5f9',
-					200: '#e2e8f0',
-					300: '#cbd5e1',
-					400: '#94a3b8',
-					500: '#64748b',
-					600: '#475569',
-					700: '#334155',
-					800: '#1e293b',
-					900: '#0f172a',
+					600: '#4b5563',
+					700: '#374151',
+					800: '#1f2937',
+					900: '#111827',
 				},
-				// Цвета для ставок
 				success: {
-					500: '#10b981',
-					600: '#059669',
+					500: '#22c55e',
+					600: '#16a34a',
+					900: '#14532d',
 				},
 				danger: {
 					500: '#ef4444',
 					600: '#dc2626',
+					900: '#7f1d1d',
 				},
 				warning: {
 					500: '#f59e0b',
-					600: '#d97706',
 				},
-				// Системные цвета
-				border: 'hsl(var(--border))',
-				input: 'hsl(var(--input))',
-				ring: 'hsl(var(--ring))',
-				background: 'hsl(var(--background))',
-				foreground: 'hsl(var(--foreground))',
-			},
-			borderRadius: {
-				lg: 'var(--radius)',
-				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)',
-			},
-			fontFamily: {
-				sans: ['Inter', 'system-ui', 'sans-serif'],
 			},
 		},
 	},

@@ -1,187 +1,57 @@
-import { BetSelection, BetSlip, BetType, Match } from '@/types';
+import { BetSlipSelection } from '@/types/api';
 import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
 
 interface BetSlipState {
-	betSlip: BetSlip;
-	isOpen: boolean;
-	isPlacing: boolean;
-	error: string | null;
+	selections: BetSlipSelection[];
+	stake: number;
 }
 
 interface BetSlipActions {
-	addSelection: (match: Match, betType: BetType, odds: number, selection: string) => void;
-	removeSelection: (matchId: string, betType: BetType) => void;
-	clearBetSlip: () => void;
-	updateStake: (stake: number) => void;
-	toggleBetSlip: () => void;
-	setBetSlipOpen: (open: boolean) => void;
-	setPlacing: (placing: boolean) => void;
-	setError: (error: string | null) => void;
-	placeBet: () => Promise<void>;
+	addSelection: (selection: BetSlipSelection) => void;
+	removeSelection: (outcomeId: number) => void;
+	clearSelections: () => void;
+	setStake: (stake: number) => void;
+	getTotalOdds: () => number;
+	getPotentialPayout: () => number;
 }
 
 type BetSlipStore = BetSlipState & BetSlipActions;
 
-const initialState: BetSlipState = {
-	betSlip: {
-		selections: [],
-		totalOdds: 1,
-		stake: 0,
-		potentialReturn: 0,
+export const useBetSlipStore = create<BetSlipStore>((set, get) => ({
+	selections: [],
+	stake: 100,
+
+	addSelection: (selection: BetSlipSelection) => {
+		set(state => {
+			const exists = state.selections.find(s => s.outcomeId === selection.outcomeId);
+			if (exists) return state;
+			return { selections: [...state.selections, selection] };
+		});
 	},
-	isOpen: false,
-	isPlacing: false,
-	error: null,
-};
 
-const calculateTotalOdds = (selections: BetSelection[]): number => {
-	return selections.reduce((total, selection) => total * selection.odds, 1);
-};
+	removeSelection: (outcomeId: number) => {
+		set(state => ({
+			selections: state.selections.filter(s => s.outcomeId !== outcomeId),
+		}));
+	},
 
-const calculatePotentialReturn = (totalOdds: number, stake: number): number => {
-	return totalOdds * stake;
-};
+	clearSelections: () => {
+		set({ selections: [] });
+	},
 
-export const useBetSlipStore = create<BetSlipStore>()(
-	devtools(
-		(set, get) => ({
-			...initialState,
+	setStake: (stake: number) => {
+		set({ stake });
+	},
 
-			addSelection: (match: Match, betType: BetType, odds: number, selection: string) => {
-				const { betSlip } = get();
-				const existingIndex = betSlip.selections.findIndex(s => s.matchId === match.id && s.betType === betType);
+	getTotalOdds: () => {
+		const { selections } = get();
+		if (selections.length === 0) return 0;
+		return selections.reduce((acc, sel) => acc * (sel.outcome.currentOdds || 1), 1);
+	},
 
-				let newSelections: BetSelection[];
-
-				if (existingIndex >= 0) {
-					// Обновляем существующий выбор
-					newSelections = betSlip.selections.map((s, index) =>
-						index === existingIndex ? { ...s, odds, selection } : s
-					);
-				} else {
-					// Добавляем новый выбор
-					const newSelection: BetSelection = {
-						matchId: match.id,
-						match,
-						betType,
-						odds,
-						selection,
-					};
-					newSelections = [...betSlip.selections, newSelection];
-				}
-
-				const totalOdds = calculateTotalOdds(newSelections);
-				const potentialReturn = calculatePotentialReturn(totalOdds, betSlip.stake);
-
-				set({
-					betSlip: {
-						...betSlip,
-						selections: newSelections,
-						totalOdds,
-						potentialReturn,
-					},
-					error: null,
-				});
-			},
-
-			removeSelection: (matchId: string, betType: BetType) => {
-				const { betSlip } = get();
-				const newSelections = betSlip.selections.filter(s => !(s.matchId === matchId && s.betType === betType));
-
-				const totalOdds = calculateTotalOdds(newSelections);
-				const potentialReturn = calculatePotentialReturn(totalOdds, betSlip.stake);
-
-				set({
-					betSlip: {
-						...betSlip,
-						selections: newSelections,
-						totalOdds,
-						potentialReturn,
-					},
-				});
-			},
-
-			clearBetSlip: () => {
-				set({
-					betSlip: {
-						selections: [],
-						totalOdds: 1,
-						stake: 0,
-						potentialReturn: 0,
-					},
-					error: null,
-				});
-			},
-
-			updateStake: (stake: number) => {
-				const { betSlip } = get();
-				const potentialReturn = calculatePotentialReturn(betSlip.totalOdds, stake);
-
-				set({
-					betSlip: {
-						...betSlip,
-						stake,
-						potentialReturn,
-					},
-				});
-			},
-
-			toggleBetSlip: () => {
-				const { isOpen } = get();
-				set({ isOpen: !isOpen });
-			},
-
-			setBetSlipOpen: (open: boolean) => {
-				set({ isOpen: open });
-			},
-
-			setPlacing: (placing: boolean) => {
-				set({ isPlacing: placing });
-			},
-
-			setError: (error: string | null) => {
-				set({ error });
-			},
-
-			placeBet: async () => {
-				const { betSlip } = get();
-
-				if (betSlip.selections.length === 0) {
-					set({ error: 'Добавьте ставки в купон' });
-					return;
-				}
-
-				if (betSlip.stake <= 0) {
-					set({ error: 'Введите сумму ставки' });
-					return;
-				}
-
-				set({ isPlacing: true, error: null });
-
-				try {
-					// Здесь будет вызов API для размещения ставки
-					// await apiService.placeBet(betSlip);
-
-					// После успешного размещения очищаем купон
-					set({
-						betSlip: {
-							selections: [],
-							totalOdds: 1,
-							stake: 0,
-							potentialReturn: 0,
-						},
-						isOpen: false,
-						isPlacing: false,
-					});
-				} catch (error) {
-					set({
-						error: error instanceof Error ? error.message : 'Ошибка при размещении ставки',
-						isPlacing: false,
-					});
-				}
-			},
-		}),
-		{ name: 'betslip-store' }
-	)
-);
+	getPotentialPayout: () => {
+		const { stake } = get();
+		const totalOdds = get().getTotalOdds();
+		return stake * totalOdds;
+	},
+}));

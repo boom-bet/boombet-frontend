@@ -1,71 +1,40 @@
-import { ApiResponse, AuthResponse, LoginRequest, RegisterRequest, User } from '@/types';
+import { LoginRequest, RegisterRequest } from '@/types/api';
 import { apiService } from './apiService';
 
+interface LoginResponse {
+	token: string;
+	userId: number;
+	email: string;
+	balance: number;
+	createdAt: string;
+	status: string;
+}
+
+interface RegisterResponse {
+	message: string;
+}
+
 class AuthService {
-	// Вход в систему
-	async login(credentials: LoginRequest): Promise<AuthResponse> {
-		const response = await apiService.post<ApiResponse<AuthResponse>>('/auth/login', credentials);
-		return response.data;
+	async login(credentials: LoginRequest): Promise<LoginResponse> {
+		const response = await apiService.post<LoginResponse>('/auth/login', credentials);
+		return response;
 	}
 
-	// Регистрация
-	async register(userData: RegisterRequest): Promise<AuthResponse> {
-		const response = await apiService.post<ApiResponse<AuthResponse>>('/auth/register', userData);
-		return response.data;
+	async register(userData: RegisterRequest): Promise<string> {
+		const response = await apiService.post<string>('/auth/register', userData);
+		return response;
 	}
 
-	// Выход из системы
-	async logout(): Promise<void> {
-		await apiService.post('/auth/logout');
+	logout(): void {
+		localStorage.removeItem('token');
 	}
 
-	// Обновление токена
-	async refreshToken(): Promise<AuthResponse> {
-		const response = await apiService.post<ApiResponse<AuthResponse>>('/auth/refresh');
-		return response.data;
+	getToken(): string | null {
+		return localStorage.getItem('token');
 	}
 
-	// Получение информации о пользователе
-	async getProfile(): Promise<User> {
-		const response = await apiService.get<ApiResponse<User>>('/auth/profile');
-		return response.data;
-	}
-
-	// Обновление профиля
-	async updateProfile(userData: Partial<User>): Promise<User> {
-		const response = await apiService.put<ApiResponse<User>>('/auth/profile', userData);
-		return response.data;
-	}
-
-	// Смена пароля
-	async changePassword(oldPassword: string, newPassword: string): Promise<void> {
-		await apiService.post('/auth/change-password', {
-			oldPassword,
-			newPassword,
-		});
-	}
-
-	// Восстановление пароля
-	async forgotPassword(email: string): Promise<void> {
-		await apiService.post('/auth/forgot-password', { email });
-	}
-
-	// Сброс пароля
-	async resetPassword(token: string, newPassword: string): Promise<void> {
-		await apiService.post('/auth/reset-password', {
-			token,
-			newPassword,
-		});
-	}
-
-	// Проверка валидности токена
-	async validateToken(): Promise<boolean> {
-		try {
-			await apiService.get('/auth/validate');
-			return true;
-		} catch {
-			return false;
-		}
+	isAuthenticated(): boolean {
+		return !!this.getToken();
 	}
 }
 

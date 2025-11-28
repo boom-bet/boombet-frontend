@@ -1,5 +1,4 @@
-import { useAuthStore } from '@/stores/authStore';
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosError, AxiosInstance } from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
@@ -15,21 +14,19 @@ class ApiService {
 			},
 		});
 
-		// Добавляем токен к каждому запросу
 		this.api.interceptors.request.use(config => {
-			const token = useAuthStore.getState().token;
+			const token = localStorage.getItem('token');
 			if (token) {
 				config.headers.Authorization = `Bearer ${token}`;
 			}
 			return config;
 		});
 
-		// Обрабатываем ошибки аутентификации
 		this.api.interceptors.response.use(
 			response => response,
-			error => {
+			(error: AxiosError) => {
 				if (error.response?.status === 401) {
-					useAuthStore.getState().logout();
+					localStorage.removeItem('token');
 					window.location.href = '/login';
 				}
 				return Promise.reject(error);
@@ -37,29 +34,23 @@ class ApiService {
 		);
 	}
 
-	// Общие методы
 	async get<T>(url: string, params?: any): Promise<T> {
-		const response = await this.api.get(url, { params });
+		const response = await this.api.get<T>(url, { params });
 		return response.data;
 	}
 
 	async post<T>(url: string, data?: any): Promise<T> {
-		const response = await this.api.post(url, data);
+		const response = await this.api.post<T>(url, data);
 		return response.data;
 	}
 
 	async put<T>(url: string, data?: any): Promise<T> {
-		const response = await this.api.put(url, data);
+		const response = await this.api.put<T>(url, data);
 		return response.data;
 	}
 
 	async delete<T>(url: string): Promise<T> {
-		const response = await this.api.delete(url);
-		return response.data;
-	}
-
-	async patch<T>(url: string, data?: any): Promise<T> {
-		const response = await this.api.patch(url, data);
+		const response = await this.api.delete<T>(url);
 		return response.data;
 	}
 }

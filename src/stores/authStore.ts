@@ -1,39 +1,28 @@
-import { User } from '@/types';
+import { User } from '@/types/api';
 import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
+import { persist } from 'zustand/middleware';
 
 interface AuthState {
 	user: User | null;
 	token: string | null;
 	isAuthenticated: boolean;
-	isLoading: boolean;
-	error: string | null;
 }
 
 interface AuthActions {
 	login: (token: string, user: User) => void;
 	logout: () => void;
 	updateUser: (user: Partial<User>) => void;
-	updateBalance: (balance: number) => void;
-	setLoading: (loading: boolean) => void;
-	setError: (error: string | null) => void;
-	clearError: () => void;
+	setToken: (token: string) => void;
 }
 
 type AuthStore = AuthState & AuthActions;
 
-const initialState: AuthState = {
-	user: null,
-	token: localStorage.getItem('token'),
-	isAuthenticated: false,
-	isLoading: false,
-	error: null,
-};
-
 export const useAuthStore = create<AuthStore>()(
-	devtools(
-		(set, get) => ({
-			...initialState,
+	persist(
+		set => ({
+			user: null,
+			token: null,
+			isAuthenticated: false,
 
 			login: (token: string, user: User) => {
 				localStorage.setItem('token', token);
@@ -41,7 +30,6 @@ export const useAuthStore = create<AuthStore>()(
 					token,
 					user,
 					isAuthenticated: true,
-					error: null,
 				});
 			},
 
@@ -51,40 +39,22 @@ export const useAuthStore = create<AuthStore>()(
 					user: null,
 					token: null,
 					isAuthenticated: false,
-					error: null,
 				});
 			},
 
 			updateUser: (userData: Partial<User>) => {
-				const currentUser = get().user;
-				if (currentUser) {
-					set({
-						user: { ...currentUser, ...userData },
-					});
-				}
+				set(state => ({
+					user: state.user ? { ...state.user, ...userData } : null,
+				}));
 			},
 
-			updateBalance: (balance: number) => {
-				const currentUser = get().user;
-				if (currentUser) {
-					set({
-						user: { ...currentUser, balance },
-					});
-				}
-			},
-
-			setLoading: (loading: boolean) => {
-				set({ isLoading: loading });
-			},
-
-			setError: (error: string | null) => {
-				set({ error });
-			},
-
-			clearError: () => {
-				set({ error: null });
+			setToken: (token: string) => {
+				localStorage.setItem('token', token);
+				set({ token, isAuthenticated: true });
 			},
 		}),
-		{ name: 'auth-store' }
+		{
+			name: 'auth-storage',
+		}
 	)
 );
