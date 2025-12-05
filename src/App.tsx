@@ -2,6 +2,7 @@ import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { AuthProvider } from './components/AuthProvider';
 import { Layout } from './components/Layout/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { AdminPage } from './pages/AdminPage';
 import { BetHistoryPage } from './pages/BetHistoryPage';
 import { HomePage } from './pages/HomePage';
 import { LivePage } from './pages/LivePage';
@@ -39,6 +40,14 @@ function App() {
 							element={
 								<ProtectedRoute>
 									<BetHistoryPage />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path='admin'
+							element={
+								<ProtectedRoute>
+									<AdminPage />
 								</ProtectedRoute>
 							}
 						/>

@@ -55,6 +55,10 @@ class EventService {
 	): Promise<EventResponse> {
 		return await apiService.get<EventResponse>('/v1/events/range', { startDate, endDate, page, size });
 	}
+
+	async finishEvent(eventId: number, result: string): Promise<string> {
+		return await apiService.post<string>(`/v1/events/${eventId}/finish`, { result });
+	}
 }
 
 export const eventService = new EventService();

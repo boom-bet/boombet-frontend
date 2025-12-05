@@ -1,3 +1,4 @@
+import { EventCard } from '@/components/EventCard/EventCard';
 import { eventService } from '@/services/eventService';
 import { Event } from '@/types/api';
 import { Radio } from 'lucide-react';
@@ -54,24 +55,7 @@ export const LivePage: React.FC = () => {
 			) : (
 				<div className='grid gap-4'>
 					{events.map(event => (
-						<div key={event.eventId} className='card hover:border-primary-600/50 transition-colors'>
-							<div className='flex items-center justify-between mb-3'>
-								<span className='text-sm text-gray-400'>{event.sportName}</span>
-								<span className='flex items-center gap-2 text-danger-500 text-sm font-semibold'>
-									<Radio className='w-4 h-4 animate-pulse' />
-									LIVE
-								</span>
-							</div>
-							<div className='flex items-center justify-between'>
-								<div className='flex-1'>
-									<h3 className='text-white font-semibold text-lg mb-1'>
-										{event.teamA} - {event.teamB}
-									</h3>
-									{event.result && <p className='text-primary-500 font-semibold'>Счёт: {event.result}</p>}
-								</div>
-								<button className='btn-primary'>Поставить</button>
-							</div>
-						</div>
+						<EventCard key={event.eventId} event={event} />
 					))}
 				</div>
 			)}

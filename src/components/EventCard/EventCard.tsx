@@ -38,7 +38,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
 
 	const handleOutcomeClick = (market: Market, outcomeId: number) => {
 		const outcome = market.outcomes.find(o => o.outcomeId === outcomeId);
-		if (!outcome || !outcome.isActive) return;
+		if (!outcome || !outcome.active) return;
 
 		if (isOutcomeSelected(outcomeId)) {
 			removeSelection(outcomeId);
@@ -65,7 +65,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
 					<h3 className='text-white font-semibold text-lg'>
 						{event.teamA} - {event.teamB}
 					</h3>
-					{event.status === 'LIVE' && event.result && (
+					{event.status === 'live' && event.result && (
 						<p className='text-primary-500 font-semibold mt-1'>Счёт: {event.result}</p>
 					)}
 				</div>
@@ -95,9 +95,9 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
 											<button
 												key={outcome.outcomeId}
 												onClick={() => handleOutcomeClick(market, outcome.outcomeId)}
-												disabled={!outcome.isActive || !outcome.currentOdds}
+												disabled={!outcome.active || !outcome.currentOdds}
 												className={`odds-button ${isOutcomeSelected(outcome.outcomeId) ? 'selected' : ''} ${
-													!outcome.isActive || !outcome.currentOdds ? 'opacity-50 cursor-not-allowed' : ''
+													!outcome.active || !outcome.currentOdds ? 'opacity-50 cursor-not-allowed' : ''
 												}`}
 											>
 												<div className='text-xs text-gray-400'>{outcome.name}</div>

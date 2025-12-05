@@ -58,7 +58,7 @@ export interface Outcome {
 	outcomeId: number;
 	name: string;
 	currentOdds: number;
-	isActive: boolean;
+	active: boolean;
 }
 
 // Ставки

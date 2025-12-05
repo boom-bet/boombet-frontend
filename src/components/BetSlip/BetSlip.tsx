@@ -35,6 +35,7 @@ export const BetSlip: React.FC = () => {
 
 		try {
 			const outcomeIds = selections.map(s => s.outcomeId);
+			console.log('Placing bet with:', { stakeAmount: stake, outcomeIds, selections });
 			await betService.placeBet({ stakeAmount: stake, outcomeIds });
 
 			setSuccess(true);
